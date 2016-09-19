@@ -6,23 +6,24 @@
 # Just throw a load of images into the input directory.. dont worry the script  converts them to bmp automatically
 # before batch processing because I know you are lazy like me
 
-__author__ = "Justin Fay & Stephen Salmon"
 import io
-import functools
 import functools
 import os.path
 import re
-import PIL
 from PIL import Image
-input_dir = '/home/stephen.salmon/Pictures/Wordpad_Glitch'
-tmp_dir = '/home/stephen.salmon/Pictures/Wordpad_Glitch/tmp' # save the converted bitmaps here
-output_dir = '/home/stephen.salmon/Pictures/Wordpad_Glitch/output'
+__author__ = "Justin Fay & Stephen Salmon"
+input_dir = '.\input\\'
+# save the converted bitmaps here
+tmp_dir = '.\\temp\\'
+output_dir = '.\output'
 image_formats = ['.jpg', '.jpeg', '.png', '.tif', '.bmp']
+
 
 def replace(img, replacements=()):
     for pattern, replacement in replacements:
         img = pattern.sub(replacement, img)
     return img
+
 
 WORDPAD_GLITCH = [
     (b'\x07', b'\x27'),
@@ -33,6 +34,7 @@ WORDPAD_GLITCH = [
 _WORDPAD_GLITCH = [
     (re.compile(sub), replacement) for (sub, replacement) in WORDPAD_GLITCH]
 wordpad_replacer = functools.partial(replace, replacements=_WORDPAD_GLITCH)
+
 
 def wordpad_glitch(input_image, output_image):
     with open(input_image, 'rb') as rh:
@@ -47,6 +49,7 @@ def wordpad_glitch(input_image, output_image):
     print("saved image {0}".format(output_image))
     wh.close()
 
+
 if __name__ == '__main__':
 
     if not os.path.exists(output_dir):
@@ -54,26 +57,25 @@ if __name__ == '__main__':
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
-    # convert all the images in the input directory to bitmaps and save to a tmp folder
+    # convert all the images in the input directory to bitmaps and save to a
+    # tmp folder
     for file in os.listdir(input_dir):
         filepath = os.path.join(input_dir, file)
         if os.path.isfile(filepath):
             if os.path.splitext(filepath)[1].lower() in image_formats:
                 img = Image.open(filepath)
                 filename = os.path.basename(filepath).split('.')[0]
-                img_tmp = os.path.join(tmp_dir, filename+'.bmp')
+                img_tmp = os.path.join(tmp_dir, filename + '.bmp')
+                print(img_tmp)
                 img.save(img_tmp)
 
     # lets glitch those motherfucking bitmaps
     for img in os.listdir(tmp_dir):
         filepath = os.path.join(tmp_dir, img)
-        output_filepath = os.path.join(output_dir, 'wp_'+img)
+        output_filepath = os.path.join(output_dir, 'wp_' + img)
         wordpad_glitch(filepath, output_filepath)
-        #clean the tmp images on the fly
+        # clean the tmp images on the fly
         try:
-           os.remove(filepath)
+            os.remove(filepath)
         except OSError:
-           print("could not delete tmp bmp file {0}".format(filepath))
-
-
-
+            print("could not delete tmp bmp file {0}".format(filepath))

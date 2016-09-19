@@ -11,8 +11,7 @@ Here is a platform independent implementation of the wordpad glitch effect, with
 (4) It never crashes on huge files like wordpad does.
 
 
-Currently on workd with Python 3 due to changes in fact the StringIO was replaced with the io module in python 3
-I'll make a python 2.x port to follow.
+Works perfectly with Python2.X, for this to work in Python 3 use the Pillow package instead of PIL.
 
 One of the interesting things about this is that now its possible to create you own implementation of how
 the wordpad glitch works by fucking around with the WORDPAD_GLITCH substitution parameters. Give me
