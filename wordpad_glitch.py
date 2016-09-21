@@ -12,6 +12,8 @@ import io
 import functools
 import os.path
 import re
+import sys
+import getopt
 from PIL import Image
 input_dir = 'input'
 output_dir = 'output'
@@ -29,6 +31,7 @@ def replace(img, replacements=()):
         img = pattern.sub(replacement, img)
     return img
 
+
 WORDPAD_GLITCH = [
     (b'\x07', b'\x27'),
     (b'\x0B', b'\x0A\x0D'),
@@ -38,6 +41,7 @@ WORDPAD_GLITCH = [
 _WORDPAD_GLITCH = [
     (re.compile(sub), replacement) for (sub, replacement) in WORDPAD_GLITCH]
 wordpad_replacer = functools.partial(replace, replacements=_WORDPAD_GLITCH)
+
 
 def wordpad_glitch(input_image, output_image):
     with open(input_image, 'rb') as rh:
@@ -63,7 +67,8 @@ def create_output_files(img, filename):
         print("could not save bmp file {0}".format(output_filepath))
     if ROTATE:
         for degrees in rotation_degrees:
-            output_filepath = os.path.join(output_dir, 'wp_' + str(degrees) + '_' + filename + '.bmp')
+            output_filepath = os.path.join(
+                output_dir, 'wp_' + str(degrees) + '_' + filename + '.bmp')
             img = img.rotate(degrees)
             try:
                 img.save(output_filepath)
@@ -72,7 +77,29 @@ def create_output_files(img, filename):
                 print("could not save bmp file {0}".format(output_filepath))
     return output_files
 
-if __name__ == '__main__':
+
+def main(argv):
+    try:
+        opts, args = getopt.getopt(argv, "hi:o:", ["inputDir=", "outputDir="])
+    except getopt.GetoptError:
+        print('wordpad_glitch.py -i <inputDir> -o <outputDir> -r <rotate switch>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print('wordpad_glitch.py -i <inputDir> -o <outputDir> -r <rotate switch>')
+            sys.exit()
+        elif (opt in ("-i", "--inputDir")):
+            global input_dir
+            input_dir = arg
+        elif (opt in ("-o", "--outputDir")):
+            global output_dir
+            output_dir = arg
+        # elif (opt in ("-r", "--rotate")):
+        #     global ROTATE
+        #     ROTATE = True
+    print('Input file is "', input_dir)
+    print('Output file is "', output_dir)
+    print('Rotate is set to "', ROTATE)
 
     if not os.path.exists(input_dir):
         print("error: could not find the input folder")
@@ -89,3 +116,8 @@ if __name__ == '__main__':
                 filename = os.path.basename(filepath).split('.')[0]
                 for output_filepath in create_output_files(img, filename):
                     wordpad_glitch(output_filepath, output_filepath)
+    pass
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
